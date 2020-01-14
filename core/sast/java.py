@@ -224,7 +224,6 @@ class Java():
             f.write(self.const.FINDSECBUGS_PATTERN_VALUE_3)
             f.write(self.const.DEPENDENCY_CHECK_PATTERN_VALUE_3)
             f.close()
-            self.update_nexus_url(repo)
             logging.info("successfully modified build.gradle for gradle project %s" % (repo))
         except:
             logging.debug("Error modifying build.gradle for gradle project %s" % (repo))

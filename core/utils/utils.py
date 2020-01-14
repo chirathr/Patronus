@@ -37,15 +37,15 @@ class Utils():
 	def run_cloc(self, repo:str):
 		parent_dir = dirname(dirname(os.path.abspath(os.path.dirname(__file__))))
 		os.chdir(parent_dir + '/tools')
-		self.execute_cmd('cloc %s%s --json --out=%s%s/cloc.txt' % (self.const.DOWNLOAD_LOCATION,repo,self.const.DOWNLOAD_LOCATION, repo), repo)
+		self.execute_cmd('cloc %s%s --json --out=%s%s/cloc.txt' % (self.const.PATRONUS_DOWNLOAD_LOCATION,repo,self.const.PATRONUS_DOWNLOAD_LOCATION, repo), repo)
 		return
 
 	def parse_cloc(self, repo:str):
 		lang = self.config.PATRONUS_SUPPORTED_LANG
 		lang_dict = {}
 		
-		if os.path.exists('%s%s/cloc.txt' % (self.const.DOWNLOAD_LOCATION,repo)):		
-			with open('%s%s/cloc.txt' % (self.const.DOWNLOAD_LOCATION, repo)) as file:
+		if os.path.exists('%s%s/cloc.txt' % (self.const.PATRONUS_DOWNLOAD_LOCATION,repo)):		
+			with open('%s%s/cloc.txt' % (self.const.PATRONUS_DOWNLOAD_LOCATION, repo)) as file:
 				res = json.loads(file.read())
 				if res.get('Java'):
 					if res['Java']['nFiles']:
@@ -62,7 +62,6 @@ class Utils():
 
 	def detect_programming_language(self, repo:str):
 		"""
-		https://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
 		"""
 		self.run_cloc(repo)
 		lang_dict = self.parse_cloc(repo)
