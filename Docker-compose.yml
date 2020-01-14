@@ -1,4 +1,4 @@
-version:'1'
-service:
-  patronus-backend:
-      build .
+version: '3'
+services:
+  patronus:
+    build: .

@@ -1,3 +1,4 @@
+from core.sast.constants import Constants
 from core.utils.elastic import elastic
 from mysql.connector import errorcode
 from core.utils.utils import Utils
@@ -6,8 +7,8 @@ from config.config import Config
 import mysql.connector
 import configparser
 import requests
-import logging 
 import hashlib
+import logging 
 import json
 import uuid
 import time
@@ -17,6 +18,7 @@ import sys
 class Dependencycheckparser():
 	def __init__(self):
 		self.es = elastic()
+		self.const = Constants()
 		self.utils = Utils()
 		self.config = Config()
 
@@ -28,7 +30,7 @@ class Dependencycheckparser():
 					except ValueError as e:
 						logging.debug('Error could not load the json file for the project: %s' % (repo))
 					for i in res['dependencies']:
-						issue = {'repo':repo, 'scanner': 'dependency-check', 'bug_type':'','language': 'java', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
+						issue = {'repo':repo, 'scanner': 'dependency_check', 'bug_type':'','language': 'java', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
 						if i.get('vulnerabilities'):
 							for j in i['vulnerabilities']:
 								if j['severity'] == "HIGH" or j['severity'] == "CRITICAL":
@@ -51,7 +53,7 @@ class Dependencycheckparser():
 				except ValueError as e:
 						logging.debug('Error could not load the json file for the project: %s' % (repo))
 				for i in res['dependencies']:
-					issue = {'repo':repo, 'scanner': 'dependency-check', 'bug_type':'','language': 'java', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
+					issue = {'repo':repo, 'scanner': 'dependency_check', 'bug_type':'','language': 'java', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
 					if i.get('vulnerabilities'):
 						for j in i['vulnerabilities']:
 							if j['severity'] == "HIGH" or j['severity'] == "CRITICAL":
@@ -74,7 +76,7 @@ class Dependencycheckparser():
 				except ValueError as e:
 						logging.debug('Error could not load the json file for the project: %s' % (repo))
 				for i in res['dependencies']:
-					issue = {'repo':repo, 'scanner': 'dependency-check', 'bug_type':'','language': 'node-js', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
+					issue = {'repo':repo, 'scanner': 'dependency_check', 'bug_type':'','language': 'node-js', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
 					if i.get('vulnerabilities'):
 						for j in i['vulnerabilities']:
 							if j['severity'] == "HIGH" or j['severity'] == "CRITICAL":

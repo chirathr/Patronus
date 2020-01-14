@@ -37,15 +37,15 @@ class Utils():
 	def run_cloc(self, repo:str):
 		parent_dir = dirname(dirname(os.path.abspath(os.path.dirname(__file__))))
 		os.chdir(parent_dir + '/tools')
-		self.execute_cmd('cloc %s%s --json --out=%s%s/cloc.txt' % (self.config.PATRONUS_DOWNLOAD_LOCATION,repo,self.config.PATRONUS_DOWNLOAD_LOCATION, repo), repo)
+		self.execute_cmd('cloc %s%s --json --out=%s%s/cloc.txt' % (self.const.DOWNLOAD_LOCATION,repo,self.const.DOWNLOAD_LOCATION, repo), repo)
 		return
 
 	def parse_cloc(self, repo:str):
 		lang = self.config.PATRONUS_SUPPORTED_LANG
 		lang_dict = {}
 		
-		if os.path.exists('%s%s/cloc.txt' % (self.config.PATRONUS_DOWNLOAD_LOCATION,repo)):		
-			with open('%s%s/cloc.txt' % (self.config.PATRONUS_DOWNLOAD_LOCATION, repo)) as file:
+		if os.path.exists('%s%s/cloc.txt' % (self.const.DOWNLOAD_LOCATION,repo)):		
+			with open('%s%s/cloc.txt' % (self.const.DOWNLOAD_LOCATION, repo)) as file:
 				res = json.loads(file.read())
 				if res.get('Java'):
 					if res['Java']['nFiles']:
@@ -62,6 +62,7 @@ class Utils():
 
 	def detect_programming_language(self, repo:str):
 		"""
+		https://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
 		"""
 		self.run_cloc(repo)
 		lang_dict = self.parse_cloc(repo)
@@ -71,6 +72,7 @@ class Utils():
 
 	def sent_result_to_db(self, repo:str, text:str, language:str=None, scanner:str=None):
 			try:
+				logging.info("inside sent_result_to_db() for project %s" % (repo))
 				connection = self.mysql_connection()
 				sql_insert_query = "INSERT INTO results (scan_id, project_name, issue, language, scanner, hash) VALUES (%s, %s, %s, %s, %s, %s)"
 				sid = uuid.uuid1()
@@ -80,6 +82,7 @@ class Utils():
 				try:
 					result = cursor.execute(sql_insert_query, val)
 					connection.commit()
+					logging.info("Data sent to database for project %s" % (repo))
 				except mysql.connector.Error as error:
 					logging.info("Error sending data to database for project :%s : Error %s" % (repo, error))
 			except mysql.connector.Error as error:
@@ -111,7 +114,9 @@ class Utils():
 		    for x in res:
 		    	issues_list.append(x[0])
 		    if res_hash in issues_list:
+		    	logging.info("Data already exist for project %s" % (repo))
 		    	return True
+		    logging.info("Data does not exist for project %s" % (repo))
 		except Exception as error:
 			logging.debug("Error sending data sent to database for project %s. Error: %s" % (repo, error))
 		finally:
@@ -121,7 +126,7 @@ class Utils():
 		return False
 
 	def sent_to_slack(self, repo:str, data:str):
-		url = self.config.SLACK_WEB_HOOK_URL
+		url = self.config.PATRONUS_SLACK_WEB_HOOK_URL
 		text = "Results for %s \n``` %s ```" % (repo, data)
 		payload = {'text': text}
 		requests.post(url, data=json.dumps(payload))	

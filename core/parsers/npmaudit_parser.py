@@ -29,7 +29,7 @@ class Npmauditparser():
 						logging.debug('Error could not load the json file for the project: %s' % (repo))
 					for i in res['advisories']:
 						try:
-							issue = {'repo':repo, 'scanner': 'npm-audit', 'bug_type':'','language': 'nodejs', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
+							issue = {'repo':repo, 'scanner': 'npm_audit', 'bug_type':'','language': 'nodejs', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
 							issue["module_name"] = res['advisories'][i]['module_name']
 							issue["title"] = res['advisories'][i]['title']
 							issue["severity"] = res['advisories'][i]['severity']

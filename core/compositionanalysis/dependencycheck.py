@@ -32,16 +32,16 @@ class DependencyCheck():
 			os.chdir("%s/%s" % (self.config.PATRONUS_DOWNLOAD_LOCATION,repo))
 			self.utils.execute_cmd("mvn compile", repo)
 			self.utils.execute_cmd("mvn dependency-check:check", repo)
-			logging.info("Successfully ran dependency-check on repo %s" % (repo))
+			logging.info("Successfully ran dependency-check on repo [maven]%s" % (repo))
 		except:
-			logging.debug("Error running dependency-check on repo %s" (repo))
+			logging.debug("Error running dependency-check on repo [maven] %s" (repo))
 		return
 
 	def dependency_check_gradle(self, repo:str):
 		try:
 			os.chdir("%s/%s" % (self.config.PATRONUS_DOWNLOAD_LOCATION, repo))
 			self.utils.execute_cmd("./gradlew dependencyCheckAnalyze", repo)
-			logging.info("Successfully ran dependency-check on repo %s" % (repo))
+			logging.info("Successfully ran dependency-check on repo [gradle]%s" % (repo))
 		except:
-			logging.debug("Error running dependency-check on repo %s" (repo), repo)
+			logging.debug("Error running dependency-check on repo [gradle]%s" (repo), repo)
 		return
