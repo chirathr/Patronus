@@ -1,8 +1,7 @@
 from core.vcs.bitbucket import MyRemoteCallbacks
-from core.sast.constants import Constants
-from core.utils.utils import Utils# execute_cmd
+from core.utils.utils import Utils
+from config.config import Config
 import subprocess
-import logging
 import os
 
 class NodeJs():
@@ -10,16 +9,16 @@ class NodeJs():
     """
 
     def __init__(self):
-        self.const = Constants()
+        self.config = Config()
         self.utils = Utils() 
 
     def npm_audit(self, repo: str):
         """
         Runs npm audit
         """
-        if os.path.exists("%s%s/" % (self.const.DOWNLOAD_LOCATION,repo)):
-            os.chdir("%s%s/" % (self.const.DOWNLOAD_LOCATION, repo))
-        if not os.path.exists('%s%s/package.json' % (self.const.DOWNLOAD_LOCATION, repo)):
+        if os.path.exists("%s%s" % (self.config.PATRONUS_DOWNLOAD_LOCATION,repo)):
+            os.chdir("%s%s" % (self.config.PATRONUS_DOWNLOAD_LOCATION, repo))
+        if not os.path.exists('%s%s/package.json' % (self.config.PATRONUS_DOWNLOAD_LOCATION, repo)):
             return
         if not os.path.exists('package-lock.json'):
             try:

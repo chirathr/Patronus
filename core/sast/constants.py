@@ -52,8 +52,6 @@ findbugs {
     effort = "max"
     reportLevel = "low"
     includeFilter = file(project.gradle.gradleUserHomeDir.parent +"/Patronus/core/sast/fsb-include.xml")
-    //includeFilter = file("core/sast/fsb-include.xml")
-    //excludeFilter = file("/home/ec2-user/appsec-automation/core/sast/fsb-exclude.xml)
 }
 }
 tasks.withType(FindBugs) {
@@ -67,7 +65,7 @@ tasks.withType(FindBugs) {
     DEPENDENCY_CHECK_XML = """<plugin>
               <groupId>org.owasp</groupId>
               <artifactId>dependency-check-maven</artifactId>
-              <version>5.2.1</version>
+              <version>5.3.0</version>
               <configuration>
                     <formats>
                         <format>JSON</format>
@@ -83,7 +81,7 @@ tasks.withType(FindBugs) {
             </plugin>"""
 
     DEPENDENCY_CHECK_PATTERN_1 = "dependencies {"
-    DEPENDENCY_CHECK_PATTERN_VALUE_1 = "classpath 'org.owasp:dependency-check-gradle:5.2.1'\n"
+    DEPENDENCY_CHECK_PATTERN_VALUE_1 = "classpath 'org.owasp:dependency-check-gradle:5.3.0'\n"
 
     DEPENDENCY_CHECK_PATTERN_2 = "apply plugin"
     DEPENDENCY_CHECK_PATTERN_VALUE_2 = "apply plugin: 'org.owasp.dependencycheck'\n"

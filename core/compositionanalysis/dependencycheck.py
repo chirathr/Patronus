@@ -1,11 +1,10 @@
-from core.sast.constants import Constants
 from core.utils.utils import Utils
+from config.config import Config
 from core.sast.java import Java
 from os.path import dirname
 import subprocess
 import logging
 import os
-from config.config import Config
 
 class DependencyCheck():
 	"""
@@ -13,7 +12,6 @@ class DependencyCheck():
 
 	def __init__(self):
 		self.java = Java()
-		self.const = Constants()
 		self.utils = Utils()
 		self.config = Config()
 
