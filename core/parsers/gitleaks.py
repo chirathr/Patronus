@@ -24,13 +24,14 @@ class Gitleaksparser():
 				with open('%s%s/gitleaks.json' % (self.config.PATRONUS_DOWNLOAD_LOCATION, repo)) as file:
 					res = json.loads(file.read())
 					for i in res['Issues']:
-						issue = {'repo':repo, 'scanner': 'gosec', 'bug_type':'','language': 'golang', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':''}
-						issue["issue"] = i['details']
+						issue = {'repo':repo, 'scanner': 'gosec', 'bug_type':'','language': 'golang', 'class_name':'', 'method_name':'', 'line_no_start':'', 'line_no_end':'','file_name': '', 'vulnerable_code':'', 'severity':'', 'module_name':'', 'advisories_url':'', 'vulnerable_versions':'', 'patched_versions':'', 'dependency_url':'', 'CVE':'', 'description':'', 'source_url':'', 'title':'','commit':'', 'tags':'', 'author':'' }
+						issue["line_no_start"] = i['line']
+						issue["commit"] = i['commit']
 						issue["file_name"] = i['file']
-						issue["vulnerable_code"] = i['code']
-						issue["line_no"] = i['line']
+						issue["tags"] = i['tags']
+						issue["author"] = i['author']
 						if self.utils.check_issue_exits(repo, str(issue)) == False and str(issue) != "":
-							self.utils.sent_result_to_db(repo, str(issue), 'golang', 'gosec')
+							self.utils.sent_result_to_db(repo, str(issue), 'gitleaks', 'gitleaks')
 							self.es.push_data_to_elastic_search(issue)
 							self.utils.sent_to_slack(repo, json.dumps(issue, indent=4))		
 			return
