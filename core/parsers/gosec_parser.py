@@ -8,13 +8,13 @@ import mysql.connector
 import configparser
 import requests
 import hashlib
+import hashlib 
+import logging
 import json
 import uuid
 import time
 import os
-import hashlib 
 import sys
-import logging
 
 class Gosecparser():
 	def __init__(self):
