@@ -53,7 +53,7 @@ Patronus is all in one Static Analysis suite for extensively used languages like
 ##	TODO:
 
 - [ ] Dashboard
-- [ ] Dockerize
+- [ ] Remove False Positives
 - [ ] Support for more languages
 
 ## Team:
