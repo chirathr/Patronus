@@ -17,7 +17,8 @@ import requests
 import uuid
 import time
 import sys
-
+import datetime
+from datetime import timedelta
 
 
 
@@ -120,6 +121,76 @@ class Utils():
 				cursor.close()
 				connection.close()
 		return False
+
+
+	def sent_asset_to_db(self, repo:str, language:str):
+			try:
+				connection = self.mysql_connection()
+				sql_insert_query = "INSERT INTO asset_inventory VALUES (%s, %s, %s, %s)"
+				asset_id = uuid.uuid1()
+				creation_date = datetime.datetime.now()
+				val = (str(asset_id), repo, creation_date, language)
+				cursor = connection.cursor(prepared=True)
+				try:
+					result = cursor.execute(sql_insert_query, val)
+					connection.commit()
+				except mysql.connector.Error as error:
+					logging.info("Error sending asset to database for project :%s : Error %s" % (repo, error))
+			except mysql.connector.Error as error:
+				logging.debug("Error sending asset sent to database for project %s" % (repo))
+				connection.rollback()
+			finally:
+			    if(connection.is_connected()):
+			        cursor.close()
+			        connection.close()
+			return
+
+	def check_asset_exits(self, repo:str, language:str):
+		issues_list = []
+		try:
+		    connection = self.mysql_connection()
+		    sql_select_query = "SELECT asset_name from asset_inventory WHERE asset_name=%s"
+		    val = (repo,)
+		    cursor = connection.cursor(prepared=True)
+		    result = cursor.execute(sql_select_query, val)
+		    res = cursor.fetchall()
+		    for x in res:
+		    	issues_list.append(x[0])
+		    if repo in issues_list:
+		    	return True
+		    	logging.info("Asset %s exists" % (repo))
+		    else:
+		    	self.sent_asset_to_db(repo, language)
+		    	logging.info("Asset %s Does not exists" % (repo))
+		except Exception as error:
+			logging.debug("Error sending data sent to database for project %s. Error: %s" % (repo, error))
+		finally:
+			if (connection.is_connected()):
+				cursor.close()
+				connection.close()
+		return False
+
+	def sent_asset_to_db(self, repo:str, language:str):
+			try:
+				connection = self.mysql_connection()
+				sql_insert_query = "INSERT INTO asset_inventory VALUES (%s, %s, %s, %s)"
+				asset_id = uuid.uuid1()
+				creation_date = datetime.datetime.now()
+				val = (str(asset_id), repo, creation_date, language)
+				cursor = connection.cursor(prepared=True)
+				try:
+					result = cursor.execute(sql_insert_query, val)
+					connection.commit()
+				except mysql.connector.Error as error:
+					logging.info("Error sending asset to database for project :%s : Error %s" % (repo, error))
+			except mysql.connector.Error as error:
+				logging.debug("Error sending asset sent to database for project %s" % (repo))
+				connection.rollback()
+			finally:
+			    if(connection.is_connected()):
+			        cursor.close()
+			        connection.close()
+			return
 
 	def sent_to_slack(self, repo:str, data:str):
 		url = self.config.PATRONUS_SLACK_WEB_HOOK_URL

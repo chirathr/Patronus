@@ -2,9 +2,10 @@ from core.parsers.dependency_check_parser import Dependencycheckparser
 from core.compositionanalysis.dependencycheck import DependencyCheck
 from core.parsers.npmaudit_parser import Npmauditparser
 from core.parsers.findsecbugs_parser import Fsbparser
-from core.secretsscanning.gitleaks import Gitleaks
 from core.parsers.gosec_parser import Gosecparser
-from core.vcs.bitbucket import MyRemoteCallbacks
+from core.secretsscanning.gitleaks import Gitleaks
+from core.vcs.bitbucket import MyRemoteCallbacks 
+from core.parsers.gitleaks import Gitleaksparser
 from core.sast.constants import Constants
 from core.utils.commands import Command
 from core.sast.nodejs import NodeJs
@@ -23,6 +24,11 @@ import uuid
 import time
 import json
 import os
+import datetime
+from datetime import timedelta
+from mysql.connector import errorcode
+from mysql.connector import Error
+import mysql.connector
 
 
 mrc = MyRemoteCallbacks()
@@ -39,12 +45,14 @@ fsbp = Fsbparser()
 dcp = Dependencycheckparser()
 np = Npmauditparser()
 utils = Utils()
+gl = Gitleaks()
+glp = Gitleaksparser()
+
 
 java_repos = []
 go_repos = []
 node_repos = []
 repos_to_scan = []
-
 
 def scan_complete():
     """
@@ -131,7 +139,7 @@ def dependency_check(repo:str):
             dcp.node_results(repo)
         logging.info('Completed dependencycheck scanning for project %s' % (repo))
     except:
-        logging.debug("Exception while scanning for dependencycheck")
+        logging.debug("Error while scanning for dependencycheck")
     return
 
 def dependency_check_for_all_repos(repos:str):
@@ -161,13 +169,15 @@ def filter_repos_by_lang():
             go_repos.append(repo['repo'])
         elif repo['lang'] == "nodejs" or repo['lang'] == "javascript":
             node_repos.append(repo['repo'])
+    add_all_asset()
     return
 
-def gitleaks():
+def gitleaks(repo:str):
     print(Fore.YELLOW + "[+]---------- Gitleaks scanning for  %s -------------" % (
         repo) + Style.RESET_ALL)
-    gl.Gitleaks(repo)
-    
+    gl.gitleaks_scan(repo)
+    glp.gitleaks_output(repo)
+
     return
 
 def gitleaks_for_all_repos(repos:str):
@@ -177,10 +187,23 @@ def gitleaks_for_all_repos(repos:str):
     pool.join()
     return
 
+def add_all_asset():
+    for repo in java_repos:
+        logging.info('check asset for java project %s' %(repo))
+        utils.check_asset_exits(repo, "java")
+    for repo in go_repos:
+        utils.check_asset_exits(repo, "go")
+        logging.info('check asset for go project %s' %(repo))
+    for repo in node_repos:
+        utils.check_asset_exits(repo, "javascript")
+        logging.info('check asset for javascript project %s' %(repo))
+    return
+
 
 def initiate_scan():
     """
     """
+
     mrc.clean_all_repos(repos)
     print(Fore.YELLOW +
           "[+]---------- Cloning all repos -------------" + Style.RESET_ALL)
@@ -189,11 +212,33 @@ def initiate_scan():
           "[+]---------- Completed cloning all repos -------------" + Style.RESET_ALL)
     get_all_repos()
     filter_repos_by_lang()
+    
     scan_all_repos(java_repos + go_repos + node_repos)
     dependency_check_for_all_repos(java_repos + node_repos)
-    gitleaks_for_all_repos(java_repos + go_repos + node_repos)
+    # gitleaks_for_all_repos(java_repos + go_repos + node_repos)
     scan_complete()
     return
+
+def scan_status(scan_start_time, scan_end_time, scan_status="N"):
+    try:
+        scan_id = uuid.uuid1()
+        connection = utils.mysql_connection()
+        sql_insert_query = "INSERT INTO scans (scan_id, scan_start_time, scan_end_time, scan_successful) VALUES (%s, %s, %s, %s)"
+        val = (str(scan_id), str(scan_start_time), str(scan_end_time), scan_status)
+        cursor = connection.cursor(prepared = True)
+        try:
+            result = cursor.execute(sql_insert_query, val)
+            connection.commit()
+        except mysql.connector.Error as error:
+            logging.info("Error %s" % (error))
+    except mysql.connector.Error as error:
+        logging.debug("Error sending asset sent to database for project")
+        connection.rollback()
+    finally:
+        if (connection.is_connected()):
+            cursor.close()
+            connection.close()
+            return
 
 def sent_to_slack(message:str):
         url = config.PATRONUS_SLACK_WEB_HOOK_URL
@@ -220,13 +265,15 @@ def logo():
 
 def main():
     sent_to_slack("Scanning started")
+    scan_start_time=datetime.datetime.now()
     log_file = os.path.dirname(os.path.abspath(__file__)) +  "/logs/logs.txt"
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', filename=log_file, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
-    logging.info('Started scanning')
+    logging.info('Starting logging')
     logo()
     initiate_scan()
-    logging.info('Completed scanning')
     sent_to_slack("Scanning completed")
+    scan_end_time=datetime.datetime.now()
+    scan_status(scan_start_time, scan_end_time, "Y")
     return
 
 if __name__ == '__main__':
